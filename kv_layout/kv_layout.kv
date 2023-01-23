@@ -1,0 +1,261 @@
+#:kivy 2.1.0
+#:import Snackbar kivymd.uix.snackbar.Snackbar
+#:import utils kivy.utils
+#:import HoverBehavior kivymd.uix.behaviors.HoverBehavior
+#:import ThemableBehavior kivymd.theming.ThemableBehavior
+#:import MDBoxLayout kivymd.uix.boxlayout.MDBoxLayout
+#:import Window kivy.core.window.Window
+#:import ScrollEffect kivy.effects.scroll.ScrollEffect
+<-SplitterStrip>:
+    border: self.parent.border if self.parent else (3, 3, 3, 3)
+    horizontal: '_h' if self.parent and self.parent.sizable_from[0] in  ('t', 'b') else ''
+    background_normal: 'atlas://data/images/defaulttheme/splitter{}{}'.format('_disabled' if self.disabled else '', self.horizontal)
+    background_down: 'atlas://data/images/defaulttheme/splitter_down{}{}'.format('_disabled' if self.disabled else '', self.horizontal)
+<MySplitterStrip@SplitterStrip+ThemableBehavior+HoverBehavior>:
+    border: self.parent.border if self.parent else (3, 3, 3, 3)
+    horizontal: '_h' if self.parent and self.parent.sizable_from[0] in  ('t', 'b') else ''
+    background_normal: 'atlas://data/images/defaulttheme/splitter{}{}'.format('_disabled' if self.disabled else '', self.horizontal)
+    background_down: 'atlas://data/images/defaulttheme/splitter_down{}{}'.format('_disabled' if self.disabled else '', self.horizontal)
+
+    on_enter: Window.set_system_cursor('size_we')
+    on_touch_down: app.playlist_panel_resizing_on(), app.playlist_panel_resizing_on()
+    on_touch_move: if app.playlist_panel_resizing: Window.set_system_cursor('size_we')
+    on_touch_up: Window.set_system_cursor('arrow'), app.playlist_panel_resizing_off()
+    on_leave: Window.set_system_cursor('arrow')
+
+<MySplitter@Splitter+MDBoxLayout+HoverBehavior>:
+    
+<MyStackLayout@StackLayout>:
+    
+    
+Screen:
+    GridLayout:
+        cols: 1
+        rows: 2
+        elevation: 10
+        GridLayout:
+            cols: 3
+            rows: 1
+            size_hint: 1, 1
+            MySplitter:
+                id: splitter
+                strip_size: 5
+                size_hint: None, 1
+                width: 169
+                sizable_from: 'right'
+                min_size:100
+                max_size:393
+                border: (0,0,0, 0)
+                strip_cls: 'MySplitterStrip'
+                canvas.before:
+                    Color:
+                        rgb: utils.get_color_from_hex("#000000")
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                GridLayout:
+                    id: layout
+                    rows: 2
+                    size_hint: 1, 1
+                    GridLayout:
+                        cols: 1
+                        rows: 3
+                        padding: 16
+                        size_hint: 1, 0.3
+
+                        MDIconButton:
+                            icon: 'home-outline'
+                            text: 'Home'
+                            user_font_size: 22
+                            pos_hint: {"center_x": .5, "center_y": .5}
+
+                        MDIconButton:
+                            icon: 'magnify'
+                            user_font_size: 22
+                            pos_hint: {"center_x": .5, "center_y": .5}
+
+                        MDIconButton:
+                            icon: 'library'
+                            user_font_size: 22
+                            pos_hint: {"center_x": .5, "center_y": .5}
+                    ScrollView:
+                        scroll_wheel_distance: 40
+                        scroll_timeout: 30
+                        smooth_scroll_end: 10
+                        size_hint: 1, .7
+                        padding: (16, 16, 16, 16)
+                        bar_margin: -3
+                        bar_width:12
+                        scroll_distance: 40
+                        effect_cls: ScrollEffect
+                        scroll_type: ['bars']
+                        StackLayout:
+                            size_hint: 1, None
+                            height: self.minimum_height
+                            padding: (12, 12, 12, 12)
+                            id: playlists
+                            cols: 1
+            ScrollView:
+                size_hint: 1, .8
+                scroll_wheel_distance: 100
+                scroll_timeout: 200
+                smooth_scroll_end: 5
+                size: (Window.width, Window.height)
+                padding: (16, 16, 16,16)
+                bar_margin: -3
+                bar_width:12
+                effect_cls: ScrollEffect
+                scroll_type: ['bars', 'content']
+                GridLayout:
+                    rows: 3
+                    id: main_screen
+                    padding: [10,10,10,10]
+                    size_hint: 1, None
+                    height: self.minimum_height
+                    spacing: [10, 10]
+                    canvas.before:
+                        Color:
+                            rgb: utils.get_color_from_hex("#121212")
+                        Rectangle:
+                            size: self.size
+                            pos: self.pos
+                    
+            MySplitter:
+                id: splitter_right
+                strip_size: 5
+                size_hint: None, 1
+                width: 100
+                sizable_from: 'left'
+                min_size:100
+                max_size:393
+                border: (0,0,0, 0)
+                strip_cls: 'MySplitterStrip'
+                canvas.before:
+                    Color:
+                        rgb: utils.get_color_from_hex("#000000")
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                GridLayout:
+                    rows: 3
+                    padding: [10,10,10,10]
+                    spacing: [10, 10]
+                    size_hint: 0.2, 0.8
+                    MDRectangleFlatButton:
+                        text: "print playback"
+                        on_press: print(app.current_playback())
+                        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+                    MDRaisedButton:
+                        id: btn
+                        text: 'Start EventLoop thread.'
+                        on_press: app.connect_to_discord()
+                        pos_hint: {"center_x": .5, "center_y": .3}
+
+                    MDRaisedButton:
+                        multiline: False
+                        size_hint_y: 0.25
+                        on_text: app.submit_pulse_text("clear")
+                    BoxLayout:
+                        Label:
+                            id: pulse_listener
+                        Label:
+                            id: status
+        GridLayout:
+            cols: 3
+            size_hint: 1, None
+            height: 90
+            id: current_track_container
+            minimun_width: 768
+            padding: 16
+            elevation: 1
+            canvas.before:
+                Color:
+                    rgb: utils.get_color_from_hex('#181818')
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            GridLayout:
+                cols: 1
+                rows: 1
+                elevation: 1
+                size_hint: .3, 1
+                FloatLayout:
+                    id: current_track
+                    cols: 3
+                    rows: 1
+                    size_hint: 1, 1
+                    
+            FloatLayout:
+                cols: 1
+                rows: 2
+                size_hint: .4, None
+                height: 56
+                pos_hint: {"center_x": .5, "center_y": .5 }
+                elevation: 3
+                FloatLayout:
+                    size_hint: None, 1
+                    width: 376
+                    elevation: 4
+                    pos_hint: {"center_x": .5, "center_y": .6 }
+                    PlaybackButton:
+                        id: shuffle-button
+                        app: app
+                        icon: 'shuffle-variant'
+                        shift_y: 73
+                        user_font_size: 18
+                        tooltip_text: 'Enable shuffle'
+                        theme_text_color: "Secondary"
+                        pos_hint: {"center_x": .23, "center_y": .5}
+                    PlaybackButton:
+                        id: previous-button
+                        app: app
+                        icon: 'skip-previous'
+                        icon_size: 25
+                        shift_y: 80
+                        theme_text_color: "Secondary"
+                        tooltip_text: 'Previous'
+                        pos_hint: {"center_x": .35, "center_y": .5}
+                    PlaybackButton:
+                        id: play-button
+                        app: app
+                        icon: 'play-circle' if not app.is_playing else 'pause-circle'
+                        user_font_size: 38
+                        shift_y: 94
+                        tooltip_text: 'Play' if not app.is_playing else 'Pause'
+                        theme_text_color: "Primary"
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                    PlaybackButton:
+                        id: next-button
+                        app: app
+                        icon: 'skip-next'
+                        user_font_size: 25
+                        shift_y: 80
+                        theme_text_color: "Secondary"
+                        tooltip_text: 'Next'
+                        pos_hint: {"center_x": .65, "center_y": .5}
+                    PlaybackButton:
+                        id: repeat-button
+                        app: app
+                        icon: 'repeat'
+                        user_font_size: 17
+                        shift_y: 73
+                        theme_text_color: "Secondary"
+                        tooltip_text: 'Enable repeat'
+                        pos_hint: {"center_x": .77, "center_y": .5}
+                FloatLayout:
+                    id: playback_progress
+                    size_hint: None, 1
+                    width: 376
+                    pos_hint: {"center_x": .5, "center_y": .4 }
+
+            GridLayout:
+                cols:2
+                size_hint: .3, .2
+                MDLabel:
+                    text: "Right"
+                MDRaisedButton:
+                    id: button
+                    text: "Devices"
+                    on_release: app.open_devices_menu()
+                    pos_hint: {"x": .5, "y": .5}
