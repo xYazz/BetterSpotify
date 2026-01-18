@@ -170,7 +170,7 @@ class RightMouseButtonNestedMenu(RightMouseButtonListItem):
         pos = [*self.parent.parent.parent.parent.touch.pos]
         pos[1]+=self.pos[1]
         if self.text=='Add to playlist':
-            self.app.rmb_track_menu.open_nested_rmb_menu(self, pos, self.parent.parent.parent.parent.row_width, hor_growth)
+            self.app.open_nested_rmb_menu(self, pos, self.parent.parent.parent.parent.row_width, hor_growth)
 
     def add_triangle_on_canvas(self):
         with self.canvas.after:

@@ -1,3 +1,4 @@
 .vscode
 venv_spotify
 __pycache__
+.cache

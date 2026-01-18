@@ -36,7 +36,7 @@ class TrackTableLabel(Label, ThemableBehavior, HoverBehavior):
         if self.collide_point(*touch.pos):
             if touch.button == 'left' and len(self.app.pressed_buttons) == 0:
                 if self.has_link:
-                    self.app.go_to_album_page(self.link)
+                    self.app.rmb_track_menu.go_to_album_page(self.link)
                 if not len(self.refs):
                     return False
                 tx, ty = touch.pos
@@ -61,7 +61,7 @@ class TrackTableLabel(Label, ThemableBehavior, HoverBehavior):
             self.color = self.on_enter_color
 
     def on_ref_press(self, *args):
-        App.get_running_app().go_to_artist_page(args[0])
+        App.get_running_app().rmb_track_menu.go_to_artist_page(args[0])
 
     def on_mouse_update_hovering_over_refs(self, *args):
         '''The method checking if mouse is over any of 

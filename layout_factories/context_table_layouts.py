@@ -7,15 +7,93 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.stacklayout import StackLayout
 from kivy.uix.image import AsyncImage
+from kivymd.uix.label import MDLabel
 from kivy.utils import get_color_from_hex
 
 
 from uix.tracktablelabel import TrackTableLabel
 from uix.tracktablerow import TrackTableRow
-from layout_factories.app_utils.app_utils import to_timer, get_text_label_centered_in_anchor_layout
+from layout_factories.app_utils.app_utils import to_timer, to_timer_with_hours, get_text_label_centered_in_anchor_layout
 import datetime
 
 
+def set_playlist_details(selected_playlist):
+    playlist_details_container = AnchorLayout(padding=[10, 10, 10, 10],
+                                                size_hint=[1, None],
+                                                anchor_x='left',
+                                                anchor_y='bottom',
+                                                height=340)
+    container = BoxLayout(size_hint=[1, 1], spacing=10)
+
+    playlist_details_container.add_widget(container)
+
+    image = AsyncImage(size_hint=[None, None],
+                        size=[232, 232],
+                        pos_hint={'bot': 1},
+                        source='')
+    container.add_widget(image)
+
+    label_details_container = BoxLayout(orientation='vertical',
+                                        spacing=10,
+                                        size_hint=[1, None])
+    container.add_widget(label_details_container)
+
+    privacy_playlist_label = MDLabel(theme_text_color='Primary',
+                                        size_hint=[1, None],
+                                        strip=True,)
+    playlist_name_label = MDLabel(font_style='H2',
+                                    size_hint=[1, None],
+                                    theme_text_color='Primary',
+                                    strip=True,)
+
+    playlist_owner_label = MDLabel(size_hint=[1, None],
+                                    theme_text_color='Primary',
+                                    strip=True,)
+
+    label_details_container.add_widget(privacy_playlist_label)
+    label_details_container.add_widget(playlist_owner_label)
+    label_details_container.add_widget(playlist_name_label)
+    duration = 0
+    if selected_playlist['tracks']['items']:
+        if 'track' in selected_playlist['tracks']['items'][0]:
+            for item in selected_playlist['tracks']['items']:
+
+                duration += item['track']['duration_ms']
+        else:
+            for item in selected_playlist['tracks']['items']:
+
+                duration += item['duration_ms']
+    if selected_playlist['images']:
+        image.source = selected_playlist['images'][0]['url']
+    image.opacity = 1
+    try:
+        privacy_playlist_label.text = "Public playlist" if selected_playlist[
+            'public'] == "True" else "Private playlist"
+    except KeyError:
+        privacy_playlist_label.text = selected_playlist['album_type'].upper(
+        )
+    playlist_name_label.text = selected_playlist['name'] = "Public playlist"
+    try:
+        playlist_owner_label.text = f'{selected_playlist["owner"]["display_name"]}'
+            
+        if selected_playlist["tracks"]["total"] > 0:
+            playlist_owner_label.text += f' {selected_playlist["tracks"]["total"]} tracks'
+        h, m, s =  to_timer_with_hours(duration)
+        if h > 0:
+            playlist_owner_label.text += f' {h} hr {m} min'
+        else:
+            if m > 0:
+                playlist_owner_label.text += f' {m} min'
+            if int(s) > 0:
+                playlist_owner_label.text += f' {s} sec'
+    except KeyError:
+        artists = [artist['name']
+                    for artist in selected_playlist['artists']]
+        playlist_owner_label.text = f"{','.join(artists)} {selected_playlist['release_date']} {selected_playlist['tracks']['total']} " + ' {0} min {1} sec'.format(
+            *to_timer(duration))
+
+    return playlist_details_container
+    
 def get_song_radio_table_track(tracks_list):
     tracks = []
     tracks_table = StackLayout(size_hint=[1, None], padding=[
@@ -97,6 +175,9 @@ def get_song_radio_table_track(tracks_list):
                 shorten=True
             )
         )
+        row.add_playback_button()
+        row.add_playing_anim(1)
+        row.row_num_label=row.get_row_numb_label()
         tracks_table.add_widget(row)
         tracks.append(row)
     return tracks, tracks_table
@@ -210,7 +291,8 @@ def get_artist_top_tracks_table(tracks_list):
     tracks_table.bind(minimum_height=tracks_table.setter('height'))
     for idx, item in enumerate(tracks_list):
         app = App.get_running_app()
-        popularity = app.spotify.track(item['id'])['popularity']
+        track = app.spotify.track(item['id'])
+        popularity = track['popularity']
         artists_ids = [artist["id"] for artist in item['artists']]
         row = TrackTableRow(orientation='horizontal',
                             pos_hint={"top": 1},
@@ -219,6 +301,7 @@ def get_artist_top_tracks_table(tracks_list):
                             album_id=item['album']['id'],
                             song_link=item['external_urls']['spotify'],
                             artists_ids=artists_ids,
+
                             size_hint=(
                                 .8, None), height=55, padding=[12, 0, 12, 0])
         row.add_widget(get_text_label_centered_in_anchor_layout(
@@ -247,6 +330,9 @@ def get_artist_top_tracks_table(tracks_list):
                 shorten=True
             )
         )
+        row.add_playback_button()
+        row.add_playing_anim(1)
+        row.row_num_label=row.get_row_numb_label()
         tracks_table.add_widget(row)
         tracks.append(row)
     return tracks, tracks_table

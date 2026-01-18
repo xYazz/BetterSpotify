@@ -13,6 +13,19 @@ def to_timer(value_in_ms):
             seconds = str('0' + str(value_in_s-min*60)[0])
         return (str(min), seconds)
 
+def to_timer_with_hours(value_in_ms):
+        value_in_s = value_in_ms/1000
+        minutes = int(value_in_s/60)
+        hours = 0
+        if minutes > 59:
+             hours = int(minutes / 60)
+             minutes = minutes - hours * 60
+        if int(value_in_s-minutes*60) > 9:
+            seconds = str(int(value_in_s-minutes*60))
+        else:
+            seconds = str('0' + str(value_in_s-minutes*60)[0])
+        return (hours, minutes, seconds)
+
 def get_text_label_centered_in_anchor_layout(
             label_text,
             label_class=Label,

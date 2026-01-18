@@ -1,4 +1,5 @@
 
+import pprint
 from kivy.app import App
 from kivy.animation import Animation
 from kivy.clock import Clock
@@ -163,17 +164,17 @@ class TrackTableRow(BoxLayout, ThemableBehavior, HoverBehavior):
         self.app.last_selected_track = self.row_number
 
     def double_tapped(self):
-        print(self.spotify_id)
-        
         try:
             self.app.spotify.start_playback(context_uri=self.app.selected_playlist['uri'], offset={
                                             'uri': f'spotify:track:{self.spotify_id}'})
             self.app.playing_context = self.app.selected_playlist['uri']
         except KeyError:
-            self.app.spotify.start_playback(uris=self.app.uris, offset={
+            self.app.spotify.start_playback(uris=self.app.rmb_track_menu.uris, offset={
                                             'uri': f'spotify:track:{self.spotify_id}'})
             self.app.playing_context = 'artists_top_tracks'
+
         self.app.playing_track = self.spotify_id
+
         try:
             self.children[self.title_label_idx].children[-1].children[0].color = '#1ed760'
         except IndexError:
@@ -181,7 +182,7 @@ class TrackTableRow(BoxLayout, ThemableBehavior, HoverBehavior):
 
         self.app.is_playing = True
         self.app.playing_track_row = self
-        Clock.schedule_once(self.app.schedule_clock_update_interface, .3)
+        Clock.schedule_once(self.app.schedule_clock_update_interface, .1)
 
 
     def remove_previous_playing_track(self):
@@ -295,16 +296,14 @@ class TrackTableRow(BoxLayout, ThemableBehavior, HoverBehavior):
         self.row_num_label.color = '#1ed760'
         self.is_playing = True
         self.button.on_touch_up = self.resume_button_callback
-        print(self.row_number)
-        self.children[self.title_label_idx].children[-1].children[0].color = '#1ed760'
+        self.button.color = '#1ed760'
         self.row_num_label.color='#1ed760'
 
     def resume_track_playback(self):
         self.button.icon = 'pause'
         self.is_playing = True
         self.button.on_touch_up = self.pause_button_callback
-        print(self.row_number)
-        self.children[self.title_label_idx].children[-1].children[0].color = '#1ed760'
+        self.buton = '#1ed760'
         self.row_num_label.color='#1ed760'
 
     def pause_button_callback(self, touch):
@@ -337,8 +336,6 @@ class TrackTableRow(BoxLayout, ThemableBehavior, HoverBehavior):
             self.is_playing = True
             self.app.is_playing = True
             self.double_tapped()
-            Clock.schedule_once(
-                self.app.schedule_clock_update_interface, 0)
 
     def add_currently_playing_animated_icon(self):
         self.anim_layout = FloatLayout()

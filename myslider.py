@@ -290,10 +290,13 @@ class MyMDSlider(ThemableBehavior, HoverBehavior, Slider):
 
     def on_touch_move(self, touch):
         super().on_touch_move(touch)
-        self.app.current_track['progress_ms'] = int(self.value)
-        self.app.get_remaining_timer()
-        self.app.get_progress_timer()
-        self.app.get_progress_slider()
+        try:
+            self.app.current_track['progress_ms'] = int(self.value)
+            self.app.get_remaining_timer()
+            self.app.get_progress_timer()
+            self.app.get_progress_slider()
+        except TypeError:
+            return
 
     def on_touch_up(self, touch):
         if super().on_touch_up(touch):
